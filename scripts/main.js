@@ -1,28 +1,29 @@
-let pratoSelecionado = null;
-let bebidaSelecionada = null;
-let sobremesaSelecionada = null;
-
-const btnConfirmar = document.querySelector(".confirmar");
-const btnCancelar = document.querySelector(".cancelar");
-const btnPedir = document.querySelector(".fazer-pedido");
-
-// classe do prato
 class Prato {
-  constructor(nome, imagem, descricao, preco) {
+  constructor({ nome, imagem, descricao, preco }) {
     this.nome = nome;
     this.imagem = imagem;
     this.descricao = descricao;
     this.preco = preco;
 
-    this.setPratos();
-    console.log("esse é o this do prato", this);
+    this.setPrato();
+  }
+
+  selecionarPrato(elemento) {
+    pedido.prato = this;
+    const selecionado = document.querySelector(`.prato .selecionado`);
+    if (selecionado !== null) {
+      selecionado.classList.remove("selecionado");
+    }
+    elemento.classList.add("selecionado");
+
+    pedido.verificarPedido();
   }
 
   getPratoView() {
     const view = document.createElement("div");
     view.classList.add("opcao");
     view.addEventListener("click", () => {
-      selecionarPrato(view, this.nome, this.preco);
+      this.selecionarPrato(view);
     });
     view.innerHTML = `
           <img src="${this.imagem}" />
@@ -39,31 +40,194 @@ class Prato {
     return view;
   }
 
-  setPratos() {
-    const pratosContainer = document.querySelector(".opcoes.prato");
+  setPrato() {
+    const pratosContainer = document.querySelector(`.opcoes.prato`);
     pratosContainer.appendChild(this.getPratoView());
   }
 }
-const prato1 = new Prato(
-  "Estrombelete de Frango",
-  "img/frango_yin_yang.png",
-  "Um pouco de batata, um pouco de salada",
-  14.9
-);
-const prato2 = new Prato(
-  "Asa de Boi",
-  "img/frango_yin_yang.png",
-  "Com molho shoyu",
-  14.9
-);
-const prato3 = new Prato(
-  "Carne de Monstro",
-  "img/frango_yin_yang.png",
-  "Com batata assada e farofa",
-  14.9
-);
 
-/* const pratos = [
+class Bebida {
+  constructor({ nome, imagem, descricao, preco }) {
+    this.nome = nome;
+    this.imagem = imagem;
+    this.descricao = descricao;
+    this.preco = preco;
+
+    this.setBebida();
+  }
+
+  selecionarBebida(elemento) {
+    pedido.bebida = this;
+    const selecionado = document.querySelector(`.bebida .selecionado`);
+    if (selecionado !== null) {
+      selecionado.classList.remove("selecionado");
+    }
+    elemento.classList.add("selecionado");
+
+    pedido.verificarPedido();
+  }
+
+  getBebidaView() {
+    const view = document.createElement("div");
+    view.classList.add("opcao");
+    view.addEventListener("click", () => {
+      this.selecionarBebida(view);
+    });
+    view.innerHTML = `
+          <img src="${this.imagem}" />
+          <div class="titulo">${this.nome}</div>
+          <div class="descricao">${this.descricao}</div>
+          <div class="fundo">
+              <div class="preco">R$ ${this.preco.toFixed(2)}</div>
+              <div class="check">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+              </div>
+          </div>
+      `;
+
+    return view;
+  }
+
+  setBebida() {
+    const BebidasContainer = document.querySelector(`.opcoes.bebida`);
+    BebidasContainer.appendChild(this.getBebidaView());
+  }
+}
+
+class Sobremesa {
+  constructor({ nome, imagem, descricao, preco }) {
+    this.nome = nome;
+    this.imagem = imagem;
+    this.descricao = descricao;
+    this.preco = preco;
+
+    this.setSobremesa();
+  }
+
+  selecionarSobremesa(elemento) {
+    pedido.sobremesa = this;
+    const selecionado = document.querySelector(`.sobremesa .selecionado`);
+    if (selecionado !== null) {
+      selecionado.classList.remove("selecionado");
+    }
+    elemento.classList.add("selecionado");
+
+    pedido.verificarPedido();
+  }
+
+  getSobremesaView() {
+    const view = document.createElement("div");
+    view.classList.add("opcao");
+    view.addEventListener("click", () => {
+      this.selecionarSobremesa(view);
+    });
+    view.innerHTML = `
+          <img src="${this.imagem}" />
+          <div class="titulo">${this.nome}</div>
+          <div class="descricao">${this.descricao}</div>
+          <div class="fundo">
+              <div class="preco">R$ ${this.preco.toFixed(2)}</div>
+              <div class="check">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+              </div>
+          </div>
+      `;
+
+    return view;
+  }
+
+  setSobremesa() {
+    const sobremesasContainer = document.querySelector(`.opcoes.sobremesa`);
+    sobremesasContainer.appendChild(this.getSobremesaView());
+  }
+}
+
+class Pedido {
+  constructor() {
+    this.btnConfirmar = null;
+    this.btnCancelar = null;
+    this.btnPedir = null;
+    this.prato = null;
+    this.bebida = null;
+    this.sobremesa = null;
+
+    this.iniciar();
+  }
+
+  iniciar() {
+    this.btnConfirmar = document.querySelector(".confirmar");
+    this.btnCancelar = document.querySelector(".cancelar");
+    this.btnPedir = document.querySelector(".fazer-pedido");
+
+    this.btnConfirmar.addEventListener("click", () => {
+      this.enviarZap();
+    });
+
+    this.btnCancelar.addEventListener("click", () => {
+      this.cancelarPedido();
+    });
+
+    this.btnPedir.addEventListener("click", () => {
+      this.confirmarPedido();
+    });
+  }
+
+  verificarPedido() {
+    if (this.prato && this.bebida && this.sobremesa) {
+      this.btnPedir.classList.add("ativo");
+      this.btnPedir.disabled = false;
+      this.btnPedir.innerHTML = "Fazer pedido";
+    }
+  }
+
+  enviarZap() {
+    const telefoneRestaurante = 553299999999;
+    const encodedText = encodeURIComponent(
+      `Olá, gostaria de fazer o pedido: \n- Prato: ${
+        this.prato.nome
+      } \n- Bebida: ${this.bebida.nome} \n- Sobremesa: ${
+        this.sobremesa.nome
+      } \nTotal: R$ ${this.getPrecoTotal().toFixed(2)}`
+    );
+
+    const urlWhatsapp = `https://wa.me/${telefoneRestaurante}?text=${encodedText}`;
+    window.open(urlWhatsapp);
+  }
+
+  cancelarPedido() {
+    const modal = document.querySelector(".overlay");
+    modal.classList.add("escondido");
+  }
+
+  confirmarPedido() {
+    const modal = document.querySelector(".overlay");
+    modal.classList.remove("escondido");
+
+    document.querySelector(".confirmar-pedido .prato .nome").innerHTML =
+      this.prato.nome;
+    document.querySelector(".confirmar-pedido .prato .preco").innerHTML =
+      this.prato.preco.toFixed(2);
+
+    document.querySelector(".confirmar-pedido .bebida .nome").innerHTML =
+      this.bebida.nome;
+    document.querySelector(".confirmar-pedido .bebida .preco").innerHTML =
+      this.bebida.preco.toFixed(2);
+
+    document.querySelector(".confirmar-pedido .sobremesa .nome").innerHTML =
+      this.sobremesa.nome;
+    document.querySelector(".confirmar-pedido .sobremesa .preco").innerHTML =
+      this.sobremesa.preco.toFixed(2);
+
+    document.querySelector(".confirmar-pedido .total .preco").innerHTML =
+      this.getPrecoTotal().toFixed(2);
+  }
+
+  getPrecoTotal() {
+    return this.prato.preco + this.bebida.preco + this.sobremesa.preco;
+  }
+}
+
+const pratos = [
   {
     nome: "Estrombelete de Frango",
     imagem: "img/frango_yin_yang.png",
@@ -82,7 +246,7 @@ const prato3 = new Prato(
     descricao: "Com batata assada e farofa",
     preco: 14.9,
   },
-]; */
+];
 
 const bebidas = [
   {
@@ -126,184 +290,7 @@ const sobremesas = [
   },
 ];
 
-function selecionarPrato(elemento, { nome, preco }) {
-  const selecionado = document.querySelector(".prato .selecionado");
-  if (selecionado !== null) {
-    selecionado.classList.remove("selecionado");
-  }
-  elemento.classList.add("selecionado");
-
-  pratoSelecionado = {
-    nome,
-    preco,
-  };
-  verificarPedido();
-}
-
-function selecionarBebida(elemento, { nome, preco }) {
-  const selecionado = document.querySelector(".bebida .selecionado");
-  if (selecionado !== null) {
-    selecionado.classList.remove("selecionado");
-  }
-  elemento.classList.add("selecionado");
-
-  bebidaSelecionada = { nome, preco };
-  verificarPedido();
-}
-
-function selecionarSobremesa(elemento, { nome, preco }) {
-  const selecionado = document.querySelector(".sobremesa .selecionado");
-  if (selecionado !== null) {
-    selecionado.classList.remove("selecionado");
-  }
-  elemento.classList.add("selecionado");
-
-  sobremesaSelecionada = { nome, preco };
-  verificarPedido();
-}
-
-function getPrecoTotal() {
-  return (
-    pratoSelecionado.preco +
-    bebidaSelecionada.preco +
-    sobremesaSelecionada.preco
-  );
-}
-
-function confirmarPedido() {
-  const modal = document.querySelector(".overlay");
-  modal.classList.remove("escondido");
-
-  document.querySelector(".confirmar-pedido .prato .nome").innerHTML =
-    pratoSelecionado.nome;
-  document.querySelector(".confirmar-pedido .prato .preco").innerHTML =
-    pratoSelecionado.preco.toFixed(2);
-
-  document.querySelector(".confirmar-pedido .bebida .nome").innerHTML =
-    bebidaSelecionada.nome;
-  document.querySelector(".confirmar-pedido .bebida .preco").innerHTML =
-    bebidaSelecionada.preco.toFixed(2);
-
-  document.querySelector(".confirmar-pedido .sobremesa .nome").innerHTML =
-    sobremesaSelecionada.nome;
-  document.querySelector(".confirmar-pedido .sobremesa .preco").innerHTML =
-    sobremesaSelecionada.preco.toFixed(2);
-
-  document.querySelector(".confirmar-pedido .total .preco").innerHTML =
-    getPrecoTotal().toFixed(2);
-}
-
-function cancelarPedido() {
-  const modal = document.querySelector(".overlay");
-  modal.classList.add("escondido");
-}
-
-function enviarZap() {
-  const telefoneRestaurante = 553299999999;
-  const encodedText = encodeURIComponent(
-    `Olá, gostaria de fazer o pedido: \n- Prato: ${
-      pratoSelecionado.nome
-    } \n- Bebida: ${bebidaSelecionada.nome} \n- Sobremesa: ${
-      sobremesaSelecionada.nome
-    } \nTotal: R$ ${getPrecoTotal().toFixed(2)}`
-  );
-
-  const urlWhatsapp = `https://wa.me/${telefoneRestaurante}?text=${encodedText}`;
-  window.open(urlWhatsapp);
-}
-
-function verificarPedido() {
-  if (pratoSelecionado && bebidaSelecionada && sobremesaSelecionada) {
-    btnPedir.classList.add("ativo");
-    btnPedir.disabled = false;
-    btnPedir.innerHTML = "Fazer pedido";
-  }
-}
-
-/* function getPratoView(prato) {
-  const view = document.createElement("div");
-  view.classList.add("opcao");
-  view.addEventListener("click", () => {
-    selecionarPrato(view, prato.nome, prato.preco);
-  });
-  view.innerHTML = `
-        <img src="${prato.imagem}" />
-        <div class="titulo">${prato.nome}</div>
-        <div class="descricao">${prato.descricao}</div>
-        <div class="fundo">
-            <div class="preco">R$ ${prato.preco.toFixed(2)}</div>
-            <div class="check">
-                <ion-icon name="checkmark-circle"></ion-icon>
-            </div>
-        </div>
-    `;
-
-  return view;
-} */
-
-function getBebidaView(bebida) {
-  const view = document.createElement("div");
-  view.classList.add("opcao");
-  view.addEventListener("click", () => {
-    selecionarBebida(view, bebida.nome, bebida.preco);
-  });
-  view.innerHTML = `
-        <img src="${bebida.imagem}" />
-        <div class="titulo">${bebida.nome}</div>
-        <div class="descricao">${bebida.descricao}</div>
-        <div class="fundo">
-            <div class="preco">R$ ${bebida.preco.toFixed(2)}</div>
-            <div class="check">
-                <ion-icon name="checkmark-circle"></ion-icon>
-            </div>
-        </div>
-    `;
-
-  return view;
-}
-
-function getSobremesaView(sobremesa) {
-  const view = document.createElement("div");
-  view.classList.add("opcao");
-  view.addEventListener("click", () => {
-    selecionarSobremesa(view, sobremesa.nome, sobremesa.preco);
-  });
-  view.innerHTML = `
-        <img src="${sobremesa.imagem}" />
-        <div class="titulo">${sobremesa.nome}</div>
-        <div class="descricao">${sobremesa.descricao}</div>
-        <div class="fundo">
-            <div class="preco">R$ ${sobremesa.preco.toFixed(2)}</div>
-            <div class="check">
-                <ion-icon name="checkmark-circle"></ion-icon>
-            </div>
-        </div>
-    `;
-
-  return view;
-}
-
-/* const pratosContainer = document.querySelector(".opcoes.prato");
-pratos.forEach((prato) => pratosContainer.appendChild(getPratoView(prato)));
- */
-const bebidasContainer = document.querySelector(".opcoes.bebida");
-bebidas.forEach((bebida) =>
-  bebidasContainer.appendChild(getBebidaView(bebida))
-);
-
-const sobremesasContainer = document.querySelector(".opcoes.sobremesa");
-sobremesas.forEach((sobremesa) =>
-  sobremesasContainer.appendChild(getSobremesaView(sobremesa))
-);
-
-btnConfirmar.addEventListener("click", () => {
-  enviarZap();
-});
-
-btnCancelar.addEventListener("click", () => {
-  cancelarPedido();
-});
-
-btnPedir.addEventListener("click", () => {
-  confirmarPedido();
-});
+pratos.forEach((prato) => new Prato(prato));
+bebidas.forEach((bebida) => new Bebida(bebida));
+sobremesas.forEach((sobremesa) => new Sobremesa(sobremesa));
+const pedido = new Pedido();
